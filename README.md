@@ -26,9 +26,10 @@ This additional header information allowed us to achieve reliability using UDP.
     • The total packets tells us the size of the file to be sent which is useful for allocation that much space on the receiving side. We have done this because the Disk I/O is slow so storing the packets on every window is an overhead. So we stored them in the memory and once the complete file is received we moved them to the disk.
     • Fin shows the end of file character and now the connection should be terminated oon both sides.
     • The timeout interval helps in retransmission of lost packets if their ack is not received or is lost We used the following function to set timeout
+```
 setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout)
-
-Connection Termination:
+```
+## Connection Termination:
 The termination of connection on both ends is an important task and if left uncheck could lead to Segmentation errors or memory overflows. So the connection is closed gracefully and sender and receiving programs return the resources back to the system.
     
     • Sender sends the FIN packet to the receiver once it has sent the complete file and got it acknowledged by the receiver.
