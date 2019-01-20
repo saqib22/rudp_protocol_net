@@ -4,21 +4,24 @@ This is an implementation of reliable User Datagram Protocol that aims to provid
 
 ## Abstract Design/Protocol
 It uses a stop and wait protocol with a window size of 5. The protocol does the following things:
-    • The sender injects 5 packets into the network
-    • The sender goes into the waiting state and waits for the acknowlegment of these 5 packets.
-    • The receiver on the other hands receives the packets and sends the acknowlegment for every packet it receives.
-    • If the sender does not receive acknowledgment for a packet then it retransmits the packet to the reciever and waits again.
-    • The sender will not send the next 5 packets unitll it has received the acknowlegments for the sent 5 packets.
+    
+    - The sender injects 5 packets into the network
+    - The sender goes into the waiting state and waits for the acknowlegment of these 5 packets.
+    - The receiver on the other hands receives the packets and sends the acknowlegment for every packet it receives.
+    - If the sender does not receive acknowledgment for a packet then it retransmits the packet to the reciever and waits again.
+    - The sender will not send the next 5 packets unitll it has received the acknowlegments for the sent 5 packets.
 The diagram shows the stop and wait function of this 5 packets window stop and wait protocol.
 
 ## Implementational Details:
 To achieve reliability we have introduced the following attributes with the transport layer  
 protocol header.
+    
     • Sequence Number
     • Total Packets
     • Fin : boolean
     • We have used a timeout inteval of 100ms on sender side.
 This additional header information allowed us to achieve reliability using UDP.
+    
     • The sequence numbers help us to order the out of order packets and place them at correct position in the file.
     • The total packets tells us the size of the file to be sent which is useful for allocation that much space on the receiving side. We have done this because the Disk I/O is slow so storing the packets on every window is an overhead. So we stored them in the memory and once the complete file is received we moved them to the disk.
     • Fin shows the end of file character and now the connection should be terminated oon both sides.
@@ -27,6 +30,7 @@ setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout)
 
 Connection Termination:
 The termination of connection on both ends is an important task and if left uncheck could lead to Segmentation errors or memory overflows. So the connection is closed gracefully and sender and receiving programs return the resources back to the system.
+    
     • Sender sends the FIN packet to the receiver once it has sent the complete file and got it acknowledged by the receiver.
     • The receiver receives this FIN packet and sends another FIN packet back to the sender telling him that he has received and wants to close the connection.
     • The sender then acknowledges this FIN packet of receiver and goes into a failry long wait state of about 10 seconds according to our implementation. The receiver on receving this ack terminates while the sender terminates after this long wait period and if nothing is received from the receiver during this wait.
